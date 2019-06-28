@@ -15,7 +15,7 @@ from orgcrawler.cli.utils import (
     get_payload_function_from_string,
 )
 
-from orgcrawler_task import utils
+from orgcrawler import tasks
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
@@ -27,7 +27,6 @@ from orgcrawler_task import utils
     required=True,
     default='~/.aws/orgcrawler/task-spec.yaml',
     show_default=True,
-    # click.File open returns an opened filehandle
     type=click.File('r'),
     help='Path to file containing orgcrawler task specifications.'
 )
@@ -41,8 +40,8 @@ def main(master_role, task_spec_file):
     print(master_role)
     print(task_spec_file)
 
-    task_spec = utils.validate_task_spec(task_spec_file)
-    master_account_id = utils.validate_master_account_id(
+    task_spec = tasks.validate_task_spec(task_spec_file)
+    master_account_id = tasks.validate_master_account_id(
         master_role,
         task_spec['master_account_id'],
     )

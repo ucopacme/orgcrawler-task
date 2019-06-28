@@ -1,26 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
-import io
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 
-here = os.path.abspath(os.path.dirname(__file__))
 
-# gather the package's long description from the README
-with io.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
-    long_description = '\n' + f.read()
+VERSION = '0.0.0'
+LONGDESC = '''
+AWS Organization configuration engine based on OrgCrawler
+=========================================================
+'''
 
-# load the package's __init__.py module as a dictionary.
-about = {}
-with open(os.path.join(here, 'orgcrawler_task/__init__.py')) as f:
-    exec(f.read(), about)
 
 setup(
-    name='orgcrawler_task',
-    version=about['__version__'],
+    name='orgcrawler-task',
+    version=VERSION,
     description='AWS Organization configuration engine based on OrgCrawler',
-    long_description=long_description,
+    long_description=LONGDESC,
     long_description_content_type='text/x-rst',
     url='https://github.com/ucopacme/orgcrawler-task',
     keywords='aws organizations boto3 orgcrawler',
@@ -43,12 +38,13 @@ setup(
         'click',
         'cerberus',
     ],
-    packages=find_packages(exclude=['dist', 'test']),
+    #packages=find_namespace_packages(include=['orgcrawler.*', 'orgcrawler.cli.*']),
+    packages=find_namespace_packages(include=['orgcrawler.*']),
     include_package_data=True,
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'task-runner=orgcrawler_task.cli:main',
+            'taskrunner=orgcrawler.cli.taskrunner:main',
         ],
     },
 )
