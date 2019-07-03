@@ -70,5 +70,5 @@ def main(readwrite_role, task_spec_file, execute):
         )
         crawler.load_account_credentials()
         payload = get_payload_function_from_string(task['payload'])
-        execution = crawler.execute(payload, list(), kwargs)
+        execution = crawler.execute(payload, **kwargs)
         click.echo(jsonfmt(execution.dump()))
