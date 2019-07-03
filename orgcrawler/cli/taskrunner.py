@@ -42,47 +42,33 @@ def main(readwrite_role, task_spec_file, execute):
       taskrunner -f /path/to/task-spec.yaml -r MyIamRole --exec
 
     '''
-    #print(readwrite_role)
-    #print(task_spec_file)
-    #print(execute)
-
+    #print('readwrite_role:', readwrite_role)
+    #print('task_spec_file:', task_spec_file)
+    #print('execute:', execute)
     task_spec = tasks.validate_task_spec(task_spec_file)
+    #print(yamlfmt(task_spec))
     org_access_role = task_spec['readonly_role']
-    account_access_role = None
     master_account_id = tasks.validate_master_account_id(
         org_access_role,
         task_spec['master_account_id'],
     )
-    #print(yamlfmt(task_spec))
 
     org = orgcrawler.orgs.Org(master_account_id, org_access_role)
     org.load()
 
     for task in task_spec['tasks']:
-        #print(yamlfmt(task))
-        if execute:
-            account_access_role = readwrite_role
+
+        kwargs = task.get('kwargs', dict())
+        kwargs['dryrun'] = not execute
+        #print('kwargs:\n{}'.format(yamlfmt(kwargs)))
+
         crawler = orgcrawler.crawlers.Crawler(
             org,
-            access_role=account_access_role, 
+            access_role=readwrite_role, 
             regions=task['regions'],
             accounts=task['accounts'],
         )
         crawler.load_account_credentials()
         payload = get_payload_function_from_string(task['payload'])
-
-        try:
-            i = task['args'].index('dryrun')
-            task['args'][i] = not execute
-        except ValueError:
-            pass
-        except AttributeError:
-            pass
-
-
-        if 'args' not in task or task['args'] is None:
-            task['args'] = []
-        if 'kwargs' not in task or task['kwargs'] is None:
-            task['kwargs'] = {}
-        execution = crawler.execute(payload, task['args'], task['kwargs'])
+        execution = crawler.execute(payload, list(), kwargs)
         click.echo(jsonfmt(execution.dump()))
